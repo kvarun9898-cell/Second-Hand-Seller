@@ -5,38 +5,34 @@ pipeline {
 
     stages {
 
-        stage('Checkout') {
+        stage('Git Checkout') {
             steps {
-                git branch: 'main',
-                    url: 'https://github.com/kvarun9898-cell/Second-Hand-Seller.git'
+                checkout scm
             }
         }
 
-        stage('Test SSH Connection') {
+        stage('Check Files') {
             steps {
                 sh '''
-                    ssh -i /var/lib/jenkins/.ssh/id_ed25519 \
-                        -o StrictHostKeyChecking=no \
-                        -o IdentitiesOnly=yes \
-                        ubuntu@10.0.1.237 \
-                        "echo SSH connection successful"
+                    pwd
+                    ls -la
                 '''
             }
         }
 
-        stage('Deploy to Docker Server') {
+        stage('Build Docker') {
             steps {
                 sh '''
-                    ssh -i /var/lib/jenkins/.ssh/id_ed25519 \
-                        -o StrictHostKeyChecking=no \
-                        -o IdentitiesOnly=yes \
-                        ubuntu@10.0.1.237 "
-                            cd ~/Second-Hand-Seller &&
-                            git pull origin main &&
-                            docker compose down &&
-                            docker compose build &&
-                            docker compose up -d
-                        "
+                    docker compose build
+                '''
+            }
+        }
+
+        stage('Deploy') {
+            steps {
+                sh '''
+                    docker compose down || true
+                    docker compose up -d
                 '''
             }
         }
@@ -44,11 +40,16 @@ pipeline {
         stage('Check Containers') {
             steps {
                 sh '''
-                    ssh -i /var/lib/jenkins/.ssh/id_ed25519 \
-                        -o StrictHostKeyChecking=no \
-                        -o IdentitiesOnly=yes \
-                        ubuntu@10.0.1.237 \
-                        "cd ~/Second-Hand-Seller && docker compose ps"
+                    docker compose ps
+                '''
+            }
+        }
+
+        stage('Test Backend') {
+            steps {
+                sh '''
+                    sleep 10
+                    curl -f http://localhost:5000
                 '''
             }
         }
