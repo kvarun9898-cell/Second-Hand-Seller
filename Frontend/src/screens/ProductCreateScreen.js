@@ -43,26 +43,42 @@ const ProductCreateScreen = ({ history }) => {
 
     const file = e.target.files[0]
     const formData = new FormData()
-    formData.append('file', file)
-    formData.append('upload_preset', "qwdzopo4")
-    setUploading(true)
-    await axios({
-      url: 'https://api.cloudinary.com/v1_1/dh3bp7vbd/upload',
-      method: 'POST',
+    formData.append('image', file)
+    //formData.append('upload_preset', "qwdzopo4")
+    //setUploading(true)
+   // await axios({
+     // url: 'https://api.cloudinary.com/v1_1/dh3bp7vbd/upload',
+      //method: 'POST',
+      //headers: {
+      //  'Content-Type': 'application/x-www-form-urlencoded',
+      //},
+      //data: formData,
+  //  })
+    //  .then(function (res) {
+      //  setImages(res.data.url)
+      //})
+      //.catch(function (err) {
+        //console.error(err)
+     // })
+    //setUploading(false)
+  //}
+  try {
+    const { data } = await axios.post('/api/uploads', formData, {
       headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
+        'Content-Type': 'multipart/form-data',
       },
-      data: formData,
     })
-      .then(function (res) {
-        setImages(res.data.url)
-      })
-      .catch(function (err) {
-        console.error(err)
-      })
-    setUploading(false)
-  }
 
+    setImages(data.url)
+  } catch (error) {
+    console.error(error)
+
+    alert(
+      error.response?.data?.message ||
+        'Image upload failed'
+    )
+  }
+}
   const submitHandler = (e) => {
     e.preventDefault()
     dispatch(

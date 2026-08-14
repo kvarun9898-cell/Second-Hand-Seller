@@ -17,12 +17,6 @@ app.use('/api/products', productRoutes)
 app.use('/api/users', userRoutes)
 app.use('/api/uploads', uploadRoutes)
 
-app.get('/api/config/cloudinary', (req, res) => {
-  res.send(process.env.CLOUDINARY_URL)
-})
-app.get('/api/config/cloudinarypreset', (req, res) => {
-  res.send(process.env.CLOUDINARY_UPLOAD_PRESET)
-})
 
 const __dirname = path.resolve()
 app.use('/uploads', express.static(path.join(__dirname, '/uploads')))
@@ -46,5 +40,9 @@ app.use((err, req, res, next) => {
   })
 })
 
-const PORT = process.env.PORT || 5000
-app.listen(PORT, console.log(`Server is running on port ${PORT}`))
+
+const PORT = process.env.PORT || 5000;
+
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`Server running on port ${PORT}`);
+});

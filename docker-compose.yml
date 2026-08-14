@@ -1,0 +1,56 @@
+services:
+
+  mongodb:
+    image: mongo:7
+    container_name: second-hand-mongodb
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: admin123
+      MONGO_INITDB_DATABASE: secondhand
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - second-hand-network
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: second-hand-backend
+    restart: unless-stopped
+    depends_on:
+      - mongodb
+    environment:
+      NODE_ENV: production
+      PORT: 5000
+
+      MONGO_URI: mongodb://admin:admin123@mongodb:27017/secondhand?authSource=admin
+      JWT_SECRET: ${JWT_SECRET}
+    ports:
+      - "5000:5000"
+    volumes:
+      - uploads_data:/app/uploads
+    networks:
+      - second-hand-network
+
+  frontend:
+    build:
+      context: ./Frontend
+      dockerfile: Dockerfile
+    container_name: second-hand-frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "80:80"
+    networks:
+      - second-hand-network
+
+volumes:
+  mongodb_data:
+  uploads_data:
+
+networks:
+  second-hand-network:
+    driver: bridge
